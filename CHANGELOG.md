@@ -6,7 +6,7 @@ across major versions and is also stamped into the header of every built file.
 ## v7b449
 
 - VAM:
-  - percentagebar: Fix positioning of parameters of some toggles
+  - percentagebar: Fix positioning parameters of some toggles
 
 ## v7b448
 
