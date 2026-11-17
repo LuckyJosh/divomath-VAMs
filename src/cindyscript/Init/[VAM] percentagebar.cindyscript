@@ -131,9 +131,6 @@ if(!contains(["basevalue", "value", "percentage"], keepstable),
 // Helper functions //
 // ================ //
 
-anystepsactive() := toggles:"showtf-div":"state"
-	% toggles:"showtf-divpercentage":"state"
-	% toggles:"showtf-divvalue":"state";
 
 
 // ===================== //
@@ -472,6 +469,7 @@ new Percentagebar(coord, width, height, value, precision, divisions, baseval, un
 		if(toggles:"parts":"state" != self():"drawvaluelabels", toggles:"parts":"click");
 		if(toggles:"percentages":"state" != self():"drawpercentagelabels", toggles:"percentages":"click");
 		if(toggles:"arch":"state" != self():"drawarches", toggles:"arch":"click");
+		if(toggles:"div":"state" != self():"drawsteps", toggles:"div":"click");
 		if(toggles:"overflow":"state" != self():"canoverflow", toggles:"overflow":"click");
 		
 		self():"drawcurrentpercentage"	:= toggles:"percentage":"state";
@@ -481,7 +479,7 @@ new Percentagebar(coord, width, height, value, precision, divisions, baseval, un
 		self():"drawpercentagelabels"		:= toggles:"percentages":"state";
 		self():"drawarches"							:= toggles:"arch":"state";
 		self():"canoverflow"						:= toggles:"overflow":"state";
-		self():"drawsteps" 							:= anystepsactive();
+		self():"drawsteps" 							:= toggles:"div":"state";
 
 		textfields:"divisions":"value" = my("divisions") + "";
 		textfields:"divisions-value":"value" =  my("basevalue")/my("divisions") + "";
@@ -502,7 +500,7 @@ new Percentagebar(coord, width, height, value, precision, divisions, baseval, un
 			self():"drawpercentagelabels"		= toggles:"percentages":"state";
 			self():"drawarches"							= toggles:"arch":"state";
 			self():"canoverflow"						= toggles:"overflow":"state";
-			self():"drawsteps" 							= anystepsactive();
+			self():"drawsteps" 							= toggles:"div":"state";
 		);
 		
 		self():"isactive" = false;
@@ -1065,28 +1063,34 @@ toggles:"showtf-perc":"script" := if(my("state"),
 );
 
 toggles:"showtf-div":"script" := if(my("state"),
-	obj = obj ++ [textfields:"divisions"];
+  eval(toggles:"div":"setstate", 'newstate->true);
+	
+  obj = obj ++ [textfields:"divisions"];
 	obj = obj ++ [buttons:"plusdiv"];
 	obj = obj ++ [buttons:"minusdiv"];
 ,
 	obj = obj -- [textfields:"divisions"];
 	obj = obj -- [buttons:"plusdiv"];
 	obj = obj -- [buttons:"minusdiv"];
-	if(!anystepsactive(), eval(toggles:"arch":"setstate", 'newstate->false));
 );
 
 toggles:"showtf-divpercentage":"script" := if(my("state"),
-	obj = obj ++ [textfields:"divisions-percentage"];
+
+	eval(toggles:"div":"setstate", 'newstate->true);
+
+  obj = obj ++ [textfields:"divisions-percentage"];
 	obj = obj ++ [buttons:"plusdiv-percentage"];
 	obj = obj ++ [buttons:"minusdiv-percentage"];
 ,
 	obj = obj -- [textfields:"divisions-percentage"];
 	obj = obj -- [buttons:"plusdiv-percentage"];
 	obj = obj -- [buttons:"minusdiv-percentage"];
-	if(!anystepsactive(), eval(toggles:"arch":"setstate", 'newstate->false));
 );
 
 toggles:"showtf-divvalue":"script" := if(my("state"),
+
+  eval(toggles:"div":"setstate", 'newstate->true);
+
 	obj = obj ++ [textfields:"divisions-value"];
 	obj = obj ++ [buttons:"plusdiv-value"];
 	obj = obj ++ [buttons:"minusdiv-value"];
@@ -1094,11 +1098,18 @@ toggles:"showtf-divvalue":"script" := if(my("state"),
 	obj = obj -- [textfields:"divisions-value"];
 	obj = obj -- [buttons:"plusdiv-value"];
 	obj = obj -- [buttons:"minusdiv-value"];
-	if(!anystepsactive(), eval(toggles:"arch":"setstate", 'newstate->false));
 );
 
-toggles:"arch":"script" := if(my("state") & !anystepsactive(),
-	eval(toggles:"showtf-div":"setstate", 'newstate->true);
+toggles:"arch":"script" := if(my("state"),
+	eval(toggles:"div":"setstate", 'newstate->true);
+);
+
+toggles:"div":"script" := if(!my("state"),
+
+	eval(toggles:"showtf-div":"setstate", 'newstate->false);
+	eval(toggles:"showtf-divvalue":"setstate", 'newstate->false);
+	eval(toggles:"showtf-divpercentage":"setstate", 'newstate->false);
+	eval(toggles:"arch":"setstate", 'newstate->false);
 );
 
 
@@ -1144,7 +1155,7 @@ forall(bars, bar,
 	bar:"drawcurrentvalue"			= toggles:"part":"state";
 	bar:"drawarches"						= toggles:"arch":"state";
 	bar:"canoverflow"						= toggles:"overflow":"state";
-	bar:"drawsteps" 						= anystepsactive();
+	bar:"drawsteps" 						= toggles:"div":"state";
 
 	bar:"standardTicks"	= 'standardTicks;
 	
